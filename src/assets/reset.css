@@ -1,0 +1,28 @@
+*{ margin:0; padding:0}
+/*常用基本标签重设*/
+body{color:#000;-webkit-text-size-adjust:none;-webkit-overflow-scrolling:touch; outline: none;background: #fff;
+  -webkit-tap-highlight-color:rgba(0,0,0,0);}
+li{ list-style:none}
+a{text-decoration:none; color: #4A4A4A;}
+a:hover{text-decoration:none;}
+img{border:0; vertical-align:middle;}
+input{vertical-align:middle; outline: none;}
+textarea{resize:none}
+form{display:inline-block;width:100%;}
+button{ border: none; background: none; text-align: center; cursor: pointer; display: block;}
+s{ text-decoration:none;}
+label{display:inline-block;}
+h3{font-size:14px;}
+em{ font-style:normal;}
+/*禁止长按链接与图片弹出菜单*/
+a,img { -webkit-touch-callout: none }
+table{border-spacing:0;border-collapse:collapse;}
+textarea{overflow-y:auto;overflow-x:hidden;outline-style:none;outline-width:initial;outline-color:initial;resize:none }
+textarea:focus{border: none; }
+
+/*clear clearfix清浮动*/
+.clear{clear:both;}
+.clearfix:after {content:"\0020"; display: block; height: 0;clear: both; visibility: hidden; }
+.clearfix {zoom: 1;}
+
+html{width: 100%;}
