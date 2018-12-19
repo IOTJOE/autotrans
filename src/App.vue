@@ -19,8 +19,8 @@
 					<div class="input_box">
 						<div class="left">
 							<el-select v-model="accounts_value" clearable multiple id="price_type" class="select_txt" placeholder="账户">
-								<el-option v-for="(account) in this.accounts_typeList" :key="account.value" :label=account.name+account.value
-								 :value=account.value></el-option>
+								<el-option v-for="(account) in this.accounts_typeList" :key="account.userAccount" :label=account.name+account.broker+account.userAccount
+								 :value=account.userAccount></el-option>
 							</el-select>
 							<el-select v-model="action_type" id="price_type" class="select_txt" placeholder="操作">
 								<el-option v-for="(action,key) in this.action_typeList" :key="key" :label=action.name :value=action.value></el-option>
@@ -63,14 +63,15 @@
 							<p  v-show="fileListRead.length>0">交易计划</p>
 							<el-table v-show="fileListRead.length>0" ref="multipleTable" :data="fileListRead" tooltip-effect="dark" style="width: 1000px" max-height="250">
 								<!--<el-table-column type="selection" width="55"> </el-table-column>-->
-								<el-table-column fixed prop="StockId" label="股票" width="120"> </el-table-column>
-                <el-table-column fixed prop="id" label="订单号" width="120"> </el-table-column>
-                <el-table-column prop="Direction" label="方向" width="120" > </el-table-column>
-                <el-table-column prop="Amount" label="数量" width="120"> </el-table-column>
-								<el-table-column prop="Price" label="价格" width="120"> </el-table-column>
-								<el-table-column prop="PriceType" label="价格类型" width="120"> </el-table-column>
-								<el-table-column prop="MarketType" label="市场类型" width="120"> </el-table-column>
-                <el-table-column prop="message" label="消息" width="120"> </el-table-column>
+                <el-table-column fixed prop="userAccount" label="账户" width="120"> </el-table-column>
+								<el-table-column fixed prop="stockId" label="股票" width="120"> </el-table-column>
+                <!--<el-table-column fixed prop="id" label="订单号" width="120"> </el-table-column>-->
+                <el-table-column prop="direction" label="方向" width="120" > </el-table-column>
+                <el-table-column prop="amount" label="数量" width="120"> </el-table-column>
+								<el-table-column prop="price" label="价格" width="120"> </el-table-column>
+								<el-table-column prop="priceType" label="价格类型" width="120"> </el-table-column>
+								<el-table-column prop="marketType" label="市场类型" width="120"> </el-table-column>
+                <!--<el-table-column prop="message" label="消息" width="120"> </el-table-column>-->
                 <!--<el-table-column prop="source" label="端口" width="120"> </el-table-column>-->
 								<!--<el-table-column fixed="right" label="操作" width="120">-->
 									<!--<template slot-scope="scope">-->
@@ -80,7 +81,7 @@
 								<!--</el-table-column>-->
 							</el-table>
 							<div style="margin-top: 20px">
-								<el-button @click="doReadFileRequest">查看交易计划</el-button>
+								<el-button @click="doReadFileRequest(chooseAccount)">查看交易计划</el-button>
 								<!--<el-button @click="toggleSelection()">取消选择</el-button>-->
 								<el-button @click="tradeAll(chooseAccount)">全部挂单</el-button>
 								<el-button @click="soldOutToday(chooseAccount)">卖出今日到期票</el-button>
@@ -148,43 +149,7 @@
 		data() {
 			return {
 				fileList: [],
-				accounts_typeList: [{
-					name: '姜忠坷-同花顺-',
-					value: '43429990',
-          file_name:'43429990',
-          server_address: "http://localhost:8088",
-          trans_address: "http://192.168.130.139:8888,",
-				}, {
-					name: '姜忠坷-东方财富-',
-					value: '320400009783',
-          file_name:'320400009783',
-          server_address: "http://localhost:8088",
-          trans_address: "http://192.168.130.139:8888,",
-				}, {
-					name: '姜忠坷-通达信模拟-',
-					value: '18516550566',
-          file_name:'18516550566',
-          server_address: "http://localhost:8088",
-          trans_address: "http://192.168.130.139:8888,",
-				}, {
-					name: '吴琴琴-实盘-',
-					value: '201130022743',
-          file_name:'201130022743',
-          server_address: "http://localhost:8088",
-          trans_address: "http://192.168.130.139:8888,",
-				}, {
-					name: '朱品章-实盘-',
-					value: '97001528',
-          file_name:'97001528',
-          server_address: "http://localhost:8088",
-          trans_address: "http://192.168.130.139:8888,",
-				}, {
-					name: '李磊-实盘-',
-					value: '310500000437',
-          file_name:'310500000437',
-          server_address: "http://localhost:8088",
-          trans_address: "http://192.168.130.139:8888,",
-				}],
+				accounts_typeList: [],
 				price: 0,
 				amount: 100,
 				trans_action: 'BUY',
@@ -299,11 +264,11 @@
 						value: '5'
 					},
 				],
-				// server_address:"https://visual.gildata.com",
-				// upload_address:"https://visual.gildata.com/zzb-server/syncFile/multifileUpload",
-				server_address: "http://localhost:8088",
+				// serverIp:"https://visual.gildata.com",
+				// upload_address:"https://visual.gildata.com/syncFile/multifileUpload",
+				serverIp: "http://joemercy.xicp.net",
 				// direct_address:"http://joemercy.xicp.net:25698",
-				direct_address: "http://192.168.130.139:8888,",
+				direct_address: "http://iotjoe.eicp.net",
 				redis_address: "https://minfo.gildata.com",
 				myValue: "",
 				storeList: [],
@@ -313,39 +278,67 @@
 		},
 		beforeShow() {},
 		methods: {
+      getUser: function() {
+        axios.get(this.serverIp + '/getUser')
+          .then(res => {
+            console.log(res.data);
+            this.accounts_typeList = res.data;
+          })
+          .catch(err => {
+
+          })
+      },
 			tradeAll: async function(userList) {
 				//TODO:批量全部挂单
         for(let i = 0; i < userList.length; i++) {
-          let account = userList[i].value;
-          let file_name = userList[i].file_name;
-          let server_address = userList[i].server_address;
-          let trans_address = userList[i].trans_address;
-          console.log("账户:" + account + "文件服务器地址:" + server_address + "实盘易地址" + trans_address);
+          let account = userList[i].userAccount;
+          let fileName = userList[i].fileName;
+          let serverIp = userList[i].serverIp;
+          let transIp = userList[i].transIp;
+          console.log("账户:" + account + "文件服务器地址:" + serverIp + "实盘易地址" + transIp);
           //TODO:加载文件
           //读取文件
-          console.log("===>开始读取文件" + file_name);
-          await axios.get(server_address + '/zzb-server/readCsv?fileName=' + file_name)
+          console.log("===>开始读取文件" + fileName);
+          await axios.get(serverIp + '/readCsv?userAccount='+account+'&fileName=' + fileName)
             .then(async res => {
               console.log("====>文件读取成功");
               let fileList = res.data;
               for (let i = 0; i < fileList.length; i++) {
                 let trans_action='';
-                if (fileList[i].Direction === '1') {
-                  trans_action = 'BUY';
+                //marketType:市场类型：1沪市 2深市
+                let price_type=0;//0:限价(数据库priceType=0),4:市价(marketType=2 深市 数据库priceType=1),6:市价(marketType=1 沪市 数据库priceType=1)
+                let type='';
+                if(fileList[i].priceType===0){
+                  type='LIMIT';
+                  price_type=0;
+                }
+                else if(fileList[i].priceType===1 && fileList[i].marketType===1){//沪市市价
+                  type='MARKET';
+                  price_type=6;
+                }
+                else if(fileList[i].priceType===1 && fileList[i].marketType===2){//深市市价
+                  type='MARKET';
+                  price_type=4;
+                }
+                if (fileList[i].direction === 1) {
+                  trans_action = 'BUY';//direction方向：1买 2到期卖3:挂单预卖
                 } else {
                   trans_action = 'SELL';
                 }
 
                 let params = {
+                  userAccount: account,
                   action: trans_action,
-                  symbol: fileList[i].StockId,
-                  type: 'LIMIT',
-                  priceType: 0,
-                  price: fileList[i].Price,
-                  amount: fileList[i].Amount,
-                  url: trans_address + "/api/v1.0/orders?client=*:" +account,
+                  symbol: fileList[i].stockId,
+                  type: type,
+                  priceType: price_type,
+                  price: fileList[i].price,
+                  amount: fileList[i].amount,
+                  direction: fileList[i].direction,
+                  marketType:fileList[i].marketType,
+                  url: transIp + "/api/v1.0/orders?client=*:" +account,
                 };
-                await axios.get(server_address + '/zzb-server/transPost', {
+                await axios.get(serverIp + '/transPost', {
                   params
                 })
                   .then(res => {
@@ -371,13 +364,13 @@
               }
 
               //TODO:保存数据到csv
-              let fd = new FormData();
-              fd.append('fileName', userList[i].file_name);
-              fd.append('fileList',  JSON.stringify(fileList));
-              console.log("保存数据到服务器");
-              await  axios.post(server_address + '/zzb-server/saveCsv',fd);
-
-              console.log(fileList);
+              // let fd = new FormData();
+              // fd.append('fileName', userList[i].fileName);
+              // fd.append('fileList',  JSON.stringify(fileList));
+              // console.log("保存数据到服务器");
+              // await  axios.post(serverIp + '/saveCsv',fd);
+              //
+              // console.log(fileList);
             }).catch(err => {
           })
         }
@@ -523,17 +516,27 @@
 
 			},
 
-			doReadFileRequest: function() {
-				let that = this;
+			doReadFileRequest: function(userList) {
+        let tmp_list=[];
+        for(let i = 0; i < userList.length; i++) {
+          let account = userList[i].userAccount;
+          let fileName = userList[i].fileName;
+          let serverIp = userList[i].serverIp;
 
-				axios.get(this.server_address + '/zzb-server/readCsv?fileName=' + that.accounts_value)
-					.then(res => {
-						console.log(res.data);
-						this.fileList = res.data;
-					})
-					.catch(err => {
-						this.result = err.data;
-					})
+
+          axios.get(serverIp + '/readCsv?userAccount='+account+'&fileName=' + fileName)
+            .then(res => {
+              // for(let i=0;i<res.data.length;i++){
+              for(let account in res.data){
+                tmp_list.push(res.data[account]);
+              }
+
+            })
+            .catch(err => {
+              this.result = err.data;
+            })
+        } this.fileList = tmp_list;
+
 			},
 			/**
 			 * POST Request
@@ -546,7 +549,7 @@
 					params = {
 						'client': '*:' + this.accounts_value
 					};
-				axios.get(this.server_address + '/zzb-server/transPost', {
+				axios.get(this.serverIp + '/transPost', {
 						params
 					})
 					.then(res => {
@@ -594,25 +597,32 @@
 			 **/
 			soldOutToday:async function(userList) {
         for(let i = 0; i < userList.length; i++) {
-          let account=userList[i].value;
-          let file_name=userList[i].file_name;
-          let server_address= userList[i].server_address;
-          let trans_address = userList[i].trans_address;
-          console.log("账户:" + account + "文件服务器地址:" + server_address + "实盘易地址" + trans_address);
+          let account=userList[i].userAccount;
+          let serverIp= userList[i].serverIp;
+          let transIp = userList[i].transIp;
+          console.log("账户:" + account + "文件服务器地址:" + serverIp + "实盘易地址" + transIp);
           let params = {
             'client': '*:' + account
           };
-              console.log("===>开始读取文件" + file_name);
-              await axios.get(server_address + '/zzb-server/readCsv?fileName=' + file_name)
+              console.log("===>开始读取数据" + account);
+              await axios.get(serverIp + '/getTraderLog?userAccount=' + account)
                 .then(async res => {
                   console.log("====>文件读取成功");
                   let fileList = res.data;
                   for (let file in fileList) {
-                    if (fileList[file].Direction == 2) {
+                    if (fileList[file].direction === 2 && fileList[file].status==='下单成功') {
                       //TODO:撤单
-                      console.log("=>开始撤单:"+fileList[file].id);
-                      await this.$axios.delete("/api/v1.0/orders/"+fileList[file].id, {
-                        params: params
+                      console.log("=>开始撤单:"+fileList[file].transId);
+                      // await this.$axios.delete("/api/v1.0/orders/"+fileList[file].transId, {
+                      //   params: params
+                      // })
+                      params={
+                        userAccount:account,
+                        orderId:fileList[file].transId,
+                        url:transIp+'/api/v1.0/orders/'
+                      };
+                      await axios.get(serverIp + '/deleteOrder', {
+                        params
                       })
                         .then(async res => {
                           console.log("==>撤单成功:" + res.data);
@@ -631,30 +641,33 @@
                     console.log("======>委托结果转为数组");
                     let jrwt = this.getTableToArry(res.data);
                     for (let file in fileList) {
-                      if (fileList[file].Direction == 2) {
+                      if (fileList[file].direction === 2) {
                         for (let key in jrwt) {
-                          if((fileList[file].id === jrwt[key].合同编号 || fileList[file].id === jrwt[key].委托编号) && jrwt[key].委托数量 - jrwt[key].成交数量 > 0  ){
-                            console.log("卖出订单号="+fileList[file].id);
+                          if((fileList[file].transId === jrwt[key].合同编号 || fileList[file].transId === jrwt[key].委托编号) && jrwt[key].委托数量 - jrwt[key].成交数量 > 0){
+                            console.log("卖出订单号="+fileList[file].transId);
                             //TODO:下单卖出
                             let trans_amount = jrwt[key].委托数量 - jrwt[key].成交数量;
                             let priceType = 4;//深圳
-                            if (fileList[file].MarketType === 1) { //沪市=转现
+                            if (fileList[file].marketType === 1) { //沪市=转现
                               priceType = 6;
                             }
                             let params = {
-                              action: 'trans',
-                              symbol: fileList[file].StockId,
+                              userAccount: account,
+                              action: 'SELL',
+                              symbol: fileList[file].stockId,
                               type: 'MARKET',
                               priceType: priceType,
                               amount: trans_amount,
-                              url: trans_address + "/api/v1.0/orders?client=*:" + account,
+                              direction: fileList[i].direction,
+                              marketType:fileList[i].marketType,
+                              url: transIp + "/api/v1.0/orders?client=*:" + account,
                             };
-                            await axios.get(server_address + '/zzb-server/transPost', {
+                            await axios.get(serverIp + '/transPost', {
                               params
                             })
                               .then(res => {
                                 if (res) {
-                                  console.log("重新卖出成功:" + "股票代码:" + fileList[file].StockId + "卖出数量:" + trans_amount + "返回信息:" + res.data);
+                                  console.log("重新卖出成功:" + "股票代码:" + fileList[file].stockId + "卖出数量:" + trans_amount + "返回信息:" + res.data);
                                 }
                               })
                               .catch(err => {
@@ -669,70 +682,6 @@
                     .catch(err => {
                       console.log("==>查询今日委托失败:" + err.data);
                     });
-                    //TODO:查询今日委托
-                    // await this.$axios.get("/api/v1.0/orders", {
-                    //   params: params
-                    // }).then(async res => {
-                    //     console.log("======>查询今日委托成功");
-                    //     console.log("======>委托结果转为数组");
-                    //     let jrwt = this.getTableToArry(res.data);
-                    //     console.log("=======>遍历数组查找所有[操作=卖出]");
-                    //     for (let key in jrwt) {
-                    //       console.log("委托编号"+jrwt[key].委托编号+jrwt[key].合同编号+"证券代码:" + jrwt[key].证券代码 + "操作:" + jrwt[key].操作 + "委托数量:" + jrwt[key].委托数量 + "成交数量:" + jrwt[key].成交数量+ "委托价格:" + jrwt[key].委托价格);
-                    //       //TODO:通达信和同花顺参数不一样,目前按照通达信格式
-                    //       if (jrwt[key].委托数量 - jrwt[key].成交数量 > 0) {
-                    //         //TODO:真实 jrwt[key].操作==='卖出'&& jrwt[key].委托数量-jrwt[key].成交数量>0
-                    //         console.log("这个要注意" + jrwt[key].证券代码);
-                    //         for (let file in fileList) {
-                    //           //TODO: 真实条件 fileList[file].StockId===jrwt[key].证券代码&&fileList[file].Direction===2&&fileList[file].Amount===jrwt[key].委托数量
-                    //           if (fileList[file].StockId === jrwt[key].证券代码 && fileList[file].Direction == 2 &&fileList[file].id==jrwt[key].委托数量) {
-                    //             //TODO:撤单
-                    //             console.log("=>开始撤单:"+jrwt[key].委托编号+jrwt[key].合同编号);
-                    //             await this.$axios.delete("/api/v1.0/orders/"+jrwt[key].委托编号, {
-                    //               params: params
-                    //             })
-                    //               .then(async res => {
-                    //                 console.log("==>撤单成功:" + res.data);
-                    //               })
-                    //               .catch(err => {
-                    //                 console.log("==>撤单失败:" + err.data);
-                    //               });
-                    //             console.log("就是它要重新卖掉" + fileList[file].StockId);
-                    //             let trans_amount = jrwt[key].委托数量 - jrwt[key].成交数量;
-                    //             let priceType = 4;//深圳
-                    //             if (fileList[file].MarketType === 1) { //沪市=转现
-                    //               priceType = 6;
-                    //             }
-                    //             //TODO:下单卖出
-                    //             let params = {
-                    //               action: 'trans',
-                    //               symbol: fileList[file].StockId,
-                    //               type: 'MARKET',
-                    //               priceType: priceType,
-                    //               amount: trans_amount,
-                    //               url: trans_address + "/api/v1.0/orders?client=*:" + account,
-                    //             };
-                    //             await axios.get(server_address + '/zzb-server/transPost', {
-                    //               params
-                    //             })
-                    //               .then(res => {
-                    //                 if (res) {
-                    //                   console.log("重新卖出成功:" + "股票代码:" + fileList[file].StockId + "卖出数量:" + trans_amount + "返回信息:" + res.data);
-                    //                 }
-                    //               })
-                    //               .catch(err => {
-                    //                 console.log(err.data)
-                    //               });
-                    //             break;
-                    //           }
-                    //         }
-                    //       }
-                    //     }
-                    //     console.log("====>数据读取成功");
-                    //   })
-                    //   .catch(err => {
-                    //   })
-
                 })
                 .catch(err => {
                   console.log("===>读取文件失败:" + err.data);
@@ -803,7 +752,7 @@
         let chooseAccount = [];
         for(let i=0;i<this.accounts_value.length;i++){
           for(let account in this.accounts_typeList){
-            if(this.accounts_typeList[account].value===this.accounts_value[i]){
+            if(this.accounts_typeList[account].userAccount===this.accounts_value[i]){
               chooseAccount.push(this.accounts_typeList[account]);
             }
           }
@@ -813,22 +762,22 @@
       fileListRead:function () {
         let that = this;
         for(let i=0;i<that.fileList.length;i++){
-          if(that.fileList[i].Direction==1){
-            that.fileList[i].Direction='买入';
-          }else if(that.fileList[i].Direction==2){
-            that.fileList[i].Direction='卖出';
-          }else if(that.fileList[i].Direction==3){
-            that.fileList[i].Direction='预卖';
+          if(that.fileList[i].direction==1){
+            that.fileList[i].direction='买入';
+          }else if(that.fileList[i].direction==2){
+            that.fileList[i].direction='卖出';
+          }else if(that.fileList[i].direction==3){
+            that.fileList[i].direction='预卖';
           }
-          if(that.fileList[i].PriceType==1){
-            that.fileList[i].PriceType='限价';
-          }else if(that.fileList[i].PriceType==2){
-            that.fileList[i].PriceType='市价';
+          if(that.fileList[i].priceType==0){
+            that.fileList[i].priceType='限价';
+          }else if(that.fileList[i].priceType==1){
+            that.fileList[i].priceType='市价';
           }
-          if(that.fileList[i].MarketType==1){
-            that.fileList[i].MarketType='沪A';
-          }else if(that.fileList[i].MarketType==2){
-            that.fileList[i].MarketType='深A';
+          if(that.fileList[i].marketType==1){
+            that.fileList[i].marketType='沪A';
+          }else if(that.fileList[i].marketType==2){
+            that.fileList[i].marketType='深A';
           }
         }
         return that.fileList;
@@ -836,6 +785,7 @@
     },
 		created() {
 			this.getOrgCode();
+			this.getUser();
 		},
 		filters: {},
 	}

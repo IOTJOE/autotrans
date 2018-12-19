@@ -33,7 +33,7 @@ function execute(url, params) {
 function uploadStru (data) {
   return axios({
     method: 'post',
-    url: 'http://127.0.0.1:8080/zzb-server/redis/stru',
+    url: 'http://127.0.0.1:8080/redis/stru',
     timeout: 20000,
     data: data
   })
@@ -41,7 +41,7 @@ function uploadStru (data) {
 function uploadFile (data) {
   return axios({
     method: 'post',
-    url: 'http://127.0.0.1:8080/zzb-server/syncFile/multifileUpload',
+    url: 'http://127.0.0.1:8080/syncFile/multifileUpload',
     timeout: 20000,
     data: data
   })
